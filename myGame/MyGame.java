@@ -6,6 +6,7 @@ import tage.input.*;
 import tage.input.action.*;
 
 import java.lang.Math;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -49,6 +50,11 @@ public class MyGame extends VariableFrameRateGame
     private ProtocolClient protClient;
     private boolean isClientConnected = false;
     private InputManager im;
+
+    // Added for skyboxes
+    private int fluffyCloudsSkybox;
+    private int lakeIslandsSkybox;
+
     
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
@@ -109,6 +115,20 @@ public class MyGame extends VariableFrameRateGame
         sphereTex = new TextureImage("metal.png");
         torusTex = new TextureImage("wood.png");
     }
+
+    @Override
+    public void loadSkyBoxes() {
+        // Load skybox textures
+        fluffyCloudsSkybox = engine.getSceneGraph().loadCubeMap("fluffyClouds");
+        lakeIslandsSkybox = engine.getSceneGraph().loadCubeMap("lakeIslands");
+    
+        // Set the active skybox
+        engine.getSceneGraph().setSkyBoxEnabled(true);
+        engine.getSceneGraph().setActiveSkyBoxTexture(fluffyCloudsSkybox);
+    
+        System.out.println("Skyboxes loaded successfully");
+    }
+
     
     @Override
     public void buildObjects() {
@@ -382,24 +402,32 @@ public class MyGame extends VariableFrameRateGame
             case KeyEvent.VK_4:
                 (engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0,0,0));
                 break;
+            case KeyEvent.VK_5:
+                // Switch to fluffy clouds skybox
+                (engine.getSceneGraph()).setActiveSkyBoxTexture(fluffyCloudsSkybox);
+                System.out.println("Switched to Fluffy Clouds skybox");
+                break;
+            case KeyEvent.VK_6:
+                // Switch to lake islands skybox
+                (engine.getSceneGraph()).setActiveSkyBoxTexture(lakeIslandsSkybox);
+                System.out.println("Switched to Lake Islands skybox");
+                break;
             case KeyEvent.VK_ESCAPE:
                 // Send bye message before shutting down if connected
                 if(protClient != null && isClientConnected) {
                     protClient.sendByeMessage();
                 }
                 break;
-
             case KeyEvent.VK_R:
-            // Attempt to reconnect if disconnected
-            if (protClient != null && !isClientConnected) {
-                System.out.println("Attempting to reconnect to server...");
-                protClient.sendJoinMessage();
-            }
-
-            break;
+                // Attempt to reconnect if disconnected
+                if (protClient != null && !isClientConnected) {
+                    System.out.println("Attempting to reconnect to server...");
+                    protClient.sendJoinMessage();
+                }
+                break;
         }
         super.keyPressed(e);
-    }
+    }    
     
     // --------- Accessor Methods ---------
     
