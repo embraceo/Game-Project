@@ -54,6 +54,13 @@ public class MyGame extends VariableFrameRateGame {
     private int fluffyCloudsSkybox;
     private int lakeIslandsSkybox;
 
+    // Added for terrain
+
+    // For terrain
+    private GameObject terr;
+    private ObjShape terrS;
+    private TextureImage hills, grass;
+
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
         gm = new GhostManager(this);
@@ -96,6 +103,8 @@ public class MyGame extends VariableFrameRateGame {
         cubeShape = new Cube();
         sphereShape = new Sphere();
         torusShape = new Torus(0.5f, 0.2f, 48); // Inner radius, outer radius, precision
+
+        terrS = new TerrainPlane(1000); // 1000x1000 resolution
     }
 
     @Override
@@ -111,6 +120,9 @@ public class MyGame extends VariableFrameRateGame {
         cubeTex = new TextureImage("brick.png");
         sphereTex = new TextureImage("metal.png");
         torusTex = new TextureImage("wood.png");
+
+        hills = new TextureImage("hills.png");
+        grass = new TextureImage("grass.png");
     }
 
     @Override
@@ -131,13 +143,13 @@ public class MyGame extends VariableFrameRateGame {
         Matrix4f initialTranslation, initialScale, initialRotation;
 
         vase = new GameObject(GameObject.root(), vaseShape);
-        initialTranslation = (new Matrix4f()).translation(0, 2, 0); // Dolphin starts slightly above water
+        initialTranslation = (new Matrix4f()).translation(0, 2, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         vase.setLocalTranslation(initialTranslation);
         vase.setLocalScale(initialScale);
         // Build the dolphin
         dol = new GameObject(GameObject.root(), dolS, doltx);
-        initialTranslation = (new Matrix4f()).translation(0, 1, 0); // Dolphin starts slightly above water
+        initialTranslation = (new Matrix4f()).translation(0, 2, 0); // Dolphin starts slightly above water
         initialScale = (new Matrix4f()).scaling(3.0f);
         dol.setLocalTranslation(initialTranslation);
         dol.setLocalScale(initialScale);
@@ -151,21 +163,21 @@ public class MyGame extends VariableFrameRateGame {
 
         // Build cubes at specific positions - further away from the dolphin
         GameObject cube1 = new GameObject(GameObject.root(), cubeShape, cubeTex);
-        initialTranslation = (new Matrix4f()).translation(0, 0, -30); // Far ahead of dolphin
+        initialTranslation = (new Matrix4f()).translation(0, 1, -50); // Far ahead of dolphin
         initialScale = (new Matrix4f()).scaling(2.0f);
         cube1.setLocalTranslation(initialTranslation);
         cube1.setLocalScale(initialScale);
         targetObjects.add(cube1);
 
         GameObject cube2 = new GameObject(GameObject.root(), cubeShape, cubeTex);
-        initialTranslation = (new Matrix4f()).translation(-25, 0, -25); // Far ahead and to the left
+        initialTranslation = (new Matrix4f()).translation(-25, 1, -45); // Far ahead and to the left
         initialScale = (new Matrix4f()).scaling(2.0f);
         cube2.setLocalTranslation(initialTranslation);
         cube2.setLocalScale(initialScale);
         targetObjects.add(cube2);
 
         GameObject cube3 = new GameObject(GameObject.root(), cubeShape, cubeTex);
-        initialTranslation = (new Matrix4f()).translation(25, 0, -25); // Far ahead and to the right
+        initialTranslation = (new Matrix4f()).translation(45, 4, -45); // Far ahead and to the right
         initialScale = (new Matrix4f()).scaling(2.0f);
         cube3.setLocalTranslation(initialTranslation);
         cube3.setLocalScale(initialScale);
@@ -173,21 +185,21 @@ public class MyGame extends VariableFrameRateGame {
 
         // Build spheres at specific positions
         GameObject sphere1 = new GameObject(GameObject.root(), sphereShape, sphereTex);
-        initialTranslation = (new Matrix4f()).translation(30, 0, 0); // Far to the right
+        initialTranslation = (new Matrix4f()).translation(60, 1, 0); // Far to the right
         initialScale = (new Matrix4f()).scaling(1.5f);
         sphere1.setLocalTranslation(initialTranslation);
         sphere1.setLocalScale(initialScale);
         targetObjects.add(sphere1);
 
         GameObject sphere2 = new GameObject(GameObject.root(), sphereShape, sphereTex);
-        initialTranslation = (new Matrix4f()).translation(-30, 0, 0); // Far to the left
+        initialTranslation = (new Matrix4f()).translation(-60, 1, 0); // Far to the left
         initialScale = (new Matrix4f()).scaling(1.5f);
         sphere2.setLocalTranslation(initialTranslation);
         sphere2.setLocalScale(initialScale);
         targetObjects.add(sphere2);
 
         GameObject sphere3 = new GameObject(GameObject.root(), sphereShape, sphereTex);
-        initialTranslation = (new Matrix4f()).translation(0, 0, 30); // Far behind
+        initialTranslation = (new Matrix4f()).translation(0, 1, 60); // Far behind
         initialScale = (new Matrix4f()).scaling(1.5f);
         sphere3.setLocalTranslation(initialTranslation);
         sphere3.setLocalScale(initialScale);
@@ -195,13 +207,25 @@ public class MyGame extends VariableFrameRateGame {
 
         // Build a torus
         GameObject torus = new GameObject(GameObject.root(), torusShape, torusTex);
-        initialTranslation = (new Matrix4f()).translation(0, 0, -40); // Far ahead, centered
+        initialTranslation = (new Matrix4f()).translation(50, 4, -60); // Far ahead, centered
         initialScale = (new Matrix4f()).scaling(5.0f);
         initialRotation = (new Matrix4f()).rotationX((float) Math.toRadians(90.0f)); // Flat orientation
         torus.setLocalTranslation(initialTranslation);
         torus.setLocalScale(initialScale);
         torus.setLocalRotation(initialRotation);
         targetObjects.add(torus);
+
+        // Add terrain object
+        terr = new GameObject(GameObject.root(), terrS, grass);
+        Matrix4f terrainTranslation = (new Matrix4f()).translation(0f, -2.0f, 0f); // move up or down
+        terr.setLocalTranslation(terrainTranslation);
+        Matrix4f terrainScale = (new Matrix4f()).scaling(100.0f, 4.0f, 100.0f); // size of terrain
+        terr.setLocalScale(terrainScale);
+        terr.setHeightMap(hills);
+    
+        // Set tiling for terrain texture
+        terr.getRenderStates().setTiling(1);
+        terr.getRenderStates().setTileFactor(40);
     }
 
     @Override
@@ -217,7 +241,7 @@ public class MyGame extends VariableFrameRateGame {
         lastFrameTime = System.currentTimeMillis();
         currFrameTime = System.currentTimeMillis();
         elapsTime = 0.0;
-        (engine.getRenderSystem()).setWindowDimensions(1900, 1000);
+        (engine.getRenderSystem()).setWindowDimensions(1920, 1080);
 
         // ------------- positioning the camera -------------
         (engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 5));
@@ -353,6 +377,12 @@ public class MyGame extends VariableFrameRateGame {
         if (im != null) {
             im.update(0.0f); // Process inputs
         }
+
+        // Update altitude of avatar based on height map
+        Vector3f loc = dol.getWorldLocation();
+        float height = terr.getHeight(loc.x(), loc.z());
+        height += 0.5f; // add an offset to prevent sinking into terrain
+        dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
     }
 
     private void updateCameraPosition() {
@@ -366,7 +396,7 @@ public class MyGame extends VariableFrameRateGame {
 
         // Set the camera offset - distance behind and height above
         float cameraDistance = 5.0f; // distance behind
-        float cameraHeight = 2.5f; // height above
+        float cameraHeight = 1.5f; // height above
 
         // Calculate camera position: dolphin position + (backDir * distance) + (up *
         // height)
