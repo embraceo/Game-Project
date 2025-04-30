@@ -37,7 +37,7 @@ public class MyGame extends VariableFrameRateGame {
 
     // shapes
     private ObjShape waterPlaneShape, cubeShape, sphereShape, torusShape, vaseShape;
-    private TextureImage waterTex, cubeTex, sphereTex, torusTex;
+    private TextureImage waterTex, cubeTex, sphereTex, torusTex, vaseTex;
     private GameObject waterPlane, cube, sphere, torus;
     private ArrayList<GameObject> targetObjects = new ArrayList<>();
 
@@ -53,6 +53,9 @@ public class MyGame extends VariableFrameRateGame {
     // Added for skyboxes
     private int fluffyCloudsSkybox;
     private int lakeIslandsSkybox;
+
+    private AnimatedShape robotS;
+    private GameObject robot;
 
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
@@ -89,13 +92,15 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void loadShapes() {
         dolS = new ImportedModel("dolphinHighPoly.obj");
-        vaseShape = new ImportedModel("vase2.obj");
+        vaseShape = new ImportedModel("vase.obj");
 
         // Add new shapes
         waterPlaneShape = new TerrainPlane(100); // More detailed plane for water
         cubeShape = new Cube();
         sphereShape = new Sphere();
         torusShape = new Torus(0.5f, 0.2f, 48); // Inner radius, outer radius, precision
+        robotS = new AnimatedShape("robot mesh.rkm", "robot skeleton.rks");
+        robotS.loadAnimation("DEFAULT", "robot animation animation.rka");
     }
 
     @Override
@@ -111,6 +116,7 @@ public class MyGame extends VariableFrameRateGame {
         cubeTex = new TextureImage("brick.png");
         sphereTex = new TextureImage("metal.png");
         torusTex = new TextureImage("wood.png");
+        vaseTex = new TextureImage("vasetest2.png");
     }
 
     @Override
@@ -129,12 +135,18 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void buildObjects() {
         Matrix4f initialTranslation, initialScale, initialRotation;
+        initialTranslation = (new Matrix4f()).translation(0, 2, 0);
+        initialScale = (new Matrix4f()).scaling(3.0f);
+        robot = new GameObject(GameObject.root(), robotS);
+        robot.setLocalTranslation(initialTranslation);
+        robot.setLocalScale(initialScale);
 
-        vase = new GameObject(GameObject.root(), vaseShape);
-        initialTranslation = (new Matrix4f()).translation(0, 2, 0); // Dolphin starts slightly above water
+        vase = new GameObject(GameObject.root(), vaseShape, vaseTex);
+        initialTranslation = (new Matrix4f()).translation(0, 2, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         vase.setLocalTranslation(initialTranslation);
         vase.setLocalScale(initialScale);
+
         // Build the dolphin
         dol = new GameObject(GameObject.root(), dolS, doltx);
         initialTranslation = (new Matrix4f()).translation(0, 1, 0); // Dolphin starts slightly above water
@@ -293,6 +305,7 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void update() {
+        robotS.updateAnimation();
         // Original update code
         lastFrameTime = currFrameTime;
         currFrameTime = System.currentTimeMillis();
