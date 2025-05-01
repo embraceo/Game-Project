@@ -6,14 +6,16 @@ import tage.networking.IGameConnection.ProtocolType;
 
 public class NetworkingServer {
     private static GameServerUDP thisUDPServer; // Made static
-    
+    private NPCcontroller npcCtrl;
+
     public NetworkingServer(int serverPort, String protocol) {
+        npcCtrl = new NPCcontroller();
         try {
-            if(protocol.toUpperCase().compareTo("TCP") == 0) {
+            if (protocol.toUpperCase().compareTo("TCP") == 0) {
                 // TCP server not implemented in this example
                 System.out.println("TCP Server not implemented");
             } else {
-                thisUDPServer = new GameServerUDP(serverPort);
+                thisUDPServer = new GameServerUDP(serverPort, npcCtrl);
                 // No need to call getServerSocket() and setTimeouts - just start the server
                 System.out.println("UDP Server started on port " + serverPort);
             }
@@ -21,17 +23,17 @@ public class NetworkingServer {
             System.out.println("Error starting server: " + e.getMessage());
             e.printStackTrace();
         }
+        npcCtrl.start(thisUDPServer);
     }
-    
+
     public static void main(String[] args) {
-        if(args.length > 1) {
+        if (args.length > 1) {
             NetworkingServer app = new NetworkingServer(
-                Integer.parseInt(args[0]), 
-                args[1]
-            );
-            
+                    Integer.parseInt(args[0]),
+                    args[1]);
+
             // Keep main thread running to maintain server
-            while(true) {
+            while (true) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -39,12 +41,12 @@ public class NetworkingServer {
                     break;
                 }
             }
-            
+
             // try/catch block
-            if(thisUDPServer != null) {
+            if (thisUDPServer != null) {
                 try {
                     thisUDPServer.shutdown();
-                } catch (Exception e) {  // Changed to Exception instead of IOException
+                } catch (Exception e) { // Changed to Exception instead of IOException
                     System.out.println("Error during server shutdown");
                 }
             }

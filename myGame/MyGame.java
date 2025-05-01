@@ -95,6 +95,14 @@ public class MyGame extends VariableFrameRateGame {
         game.game_loop();
     }
 
+    public ObjShape getNPCshape() {
+        return vaseShape;
+    }
+
+    TextureImage getNPCtexture() {
+        return vaseTex;
+    }
+
     @Override
     public void loadShapes() {
         dolS = new ImportedModel("dolphinHighPoly.obj");
@@ -152,12 +160,12 @@ public class MyGame extends VariableFrameRateGame {
         robot.setLocalTranslation(initialTranslation);
         robot.setLocalScale(initialScale);
 
-        vase = new GameObject(GameObject.root(), vaseShape, vaseTex);
-        vase = new GameObject(GameObject.root(), vaseShape);
-        initialTranslation = (new Matrix4f()).translation(0, 2, 0);
-        initialScale = (new Matrix4f()).scaling(3.0f);
-        vase.setLocalTranslation(initialTranslation);
-        vase.setLocalScale(initialScale);
+        // vase = new GameObject(GameObject.root(), vaseShape, vaseTex);
+        // vase = new GameObject(GameObject.root(), vaseShape);
+        // initialTranslation = (new Matrix4f()).translation(0, 2, 0);
+        // initialScale = (new Matrix4f()).scaling(3.0f);
+        // vase.setLocalTranslation(initialTranslation);
+        // vase.setLocalScale(initialScale);
 
         // Build the dolphin
         dol = new GameObject(GameObject.root(), dolS, doltx);
