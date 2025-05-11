@@ -112,6 +112,11 @@ public class MyGame extends VariableFrameRateGame {
     private boolean soundEnabled = true; // Track if sound is enabled or not
     private boolean physicsRenderEnabled = false; // Track if physics rendering is enabled
 
+    // For finish flag
+    private ObjShape finishFlagShape;
+    private TextureImage checkerTexture;
+    private GameObject finishFlagObj;
+
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
         gm = new GhostManager(this);
@@ -169,6 +174,9 @@ public class MyGame extends VariableFrameRateGame {
         robotS.loadAnimation("DEFAULT", "robot animation animation.rka");
 
         terrS = new TerrainPlane(1000); // 1000x1000 resolution
+
+        // Load the finish flag model
+        finishFlagShape = new ImportedModel("finish_flag.obj");
     }
 
     @Override
@@ -185,6 +193,9 @@ public class MyGame extends VariableFrameRateGame {
 
         hills = new TextureImage("hills.png");
         grass = new TextureImage("grass.png");
+
+        // Load the checker texture for the flag
+        checkerTexture = new TextureImage("checker_texture.png");
 
         // Add platform texture
         TextureImage platformTex = new TextureImage("metal.png");
@@ -271,6 +282,15 @@ public class MyGame extends VariableFrameRateGame {
         vase.setLocalTranslation(initialTranslation);
         vase.setLocalScale(initialScale);
         vase_AnimatedShape.playAnimation("ANIMATION", 0.5f, AnimatedShape.EndType.LOOP, 0);
+        
+        
+        // Create finish flag object
+        finishFlagObj = new GameObject(GameObject.root(), finishFlagShape, checkerTexture);
+        finishFlagObj.setShape(finishFlagShape);
+        finishFlagObj.setTextureImage(checkerTexture);
+        
+        finishFlagObj.setLocalLocation(new Vector3f(0.0f, 0.0f, 0.0f));
+            
         // Build the dolphin
         dol = new GameObject(GameObject.root(), dolS, doltx);
         initialTranslation = (new Matrix4f()).translation(0, 2, 0); // Dolphin starts slightly above water
