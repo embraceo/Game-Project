@@ -60,6 +60,7 @@ public class MyGame extends VariableFrameRateGame {
     // For skyboxes
     private int fluffyCloudsSkybox;
     private int lakeIslandsSkybox;
+    private int grayVoidSkybox;
 
     private AnimatedShape robotS;
     private GameObject robot;
@@ -186,10 +187,11 @@ public class MyGame extends VariableFrameRateGame {
         // Load skybox textures
         fluffyCloudsSkybox = engine.getSceneGraph().loadCubeMap("fluffyClouds");
         lakeIslandsSkybox = engine.getSceneGraph().loadCubeMap("lakeIslands");
+        grayVoidSkybox = engine.getSceneGraph().loadCubeMap("grayVoid");
 
         // Set the active skybox
         engine.getSceneGraph().setSkyBoxEnabled(true);
-        engine.getSceneGraph().setActiveSkyBoxTexture(fluffyCloudsSkybox);
+        engine.getSceneGraph().setActiveSkyBoxTexture(grayVoidSkybox);
 
         System.out.println("Skyboxes loaded successfully");
     }
