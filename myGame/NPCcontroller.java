@@ -41,6 +41,7 @@ public class NPCcontroller {
 
     public void npcLoop() {
         while (true) {
+
             long currentTime = System.nanoTime();
             float elapsedThinkMilliSecs = (currentTime - lastThinkUpdateTime) / (1000000.0f);
             float elapsedTickMilliSecs = (currentTime - lastTickUpdateTime) / (1000000.0f);

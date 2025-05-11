@@ -10,6 +10,7 @@ import org.joml.Matrix4f;
 import tage.networking.client.GameConnectionClient;
 import tage.GameObject;
 import tage.networking.IGameConnection.ProtocolType;
+import tage.shapes.AnimatedShape;
 
 public class ProtocolClient extends GameConnectionClient {
 
@@ -41,12 +42,15 @@ public class ProtocolClient extends GameConnectionClient {
     // ------------- GHOST NPC SECTION --------------
     private void createGhostNPC(Vector3f position) throws IOException {
         if (ghostNPC == null)
-            ghostNPC = new GhostNPC(0, game.getNPCshape(),
+            ghostNPC = new GhostNPC(0, game.getNPCAnimatedShape(),
                     game.getNPCtexture(), position);
     }
 
     private void updateGhostNPC(Vector3f position, double gsize) {
         boolean gs;
+        // game.getNPCAnimatedShape().playAnimation("ANIMATION", 0.5f,
+        // AnimatedShape.EndType.LOOP, 0);
+        // game.getNPCAnimatedShape().updateAnimation();
         if (ghostNPC == null) {
             try {
                 createGhostNPC(position);
