@@ -35,10 +35,11 @@ public class MyGame extends VariableFrameRateGame {
     private int counter = 0;
     private double lastFrameTime, currFrameTime, elapsTime;
 
-    private GameObject dol, vase;
+    private GameObject dol, vase, flag, finishPlatform;
     private ObjShape dolS;
     private TextureImage doltx;
     private TextureImage dolWireframeTx;
+    private TextureImage flagTexture;
     private Light light1, spotlight1, spotlight2, spotlight3, spotlight4, spotlight5;
     private Vector3f[] spotlightsPositions = new Vector3f[5];
     private boolean renderLights = true;
@@ -49,6 +50,7 @@ public class MyGame extends VariableFrameRateGame {
     private GameObject waterPlane;
     private ArrayList<GameObject> targetObjects = new ArrayList<>();
     private AnimatedShape vase_AnimatedShape;
+    private ObjShape flagShape;
 
     // For networking
     private GhostManager gm;
@@ -87,7 +89,7 @@ public class MyGame extends VariableFrameRateGame {
     private ArrayList<PhysicsObject> movingPlatformPhysics = new ArrayList<>();
     private ArrayList<Vector3f> platformStartPositions = new ArrayList<>();
     private ArrayList<Vector3f> platformEndPositions = new ArrayList<>();
-    private float platformMoveSpeed = 1.5f;
+    private float platformMoveSpeed = 1f;
 
     // Pendulum swinging boosts
     private long lastBoostTime = 0;
@@ -158,6 +160,7 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadShapes() {
+        flagShape = new ImportedModel("finish_flag.obj");
         dolS = new ImportedModel("dolphinHighPoly.obj");
         vaseShape = new ImportedModel("vase.obj");
         vase_AnimatedShape = new AnimatedShape("vase_rkm.rkm", "vase_rks.rks");
@@ -188,6 +191,8 @@ public class MyGame extends VariableFrameRateGame {
 
         // Add platform texture
         TextureImage platformTex = new TextureImage("metal.png");
+
+        flagTexture = new TextureImage("checker_texture.png");
     }
 
     @Override
@@ -258,7 +263,19 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void buildObjects() {
+
         Matrix4f initialTranslation, initialScale, initialRotation;
+
+        flag = new GameObject(GameObject.root(), flagShape, flagTexture);
+        initialTranslation = (new Matrix4f()).translation(0, 0, 0);
+        initialScale = (new Matrix4f()).scaling(1.0f);
+        flag.setLocalTranslation(initialTranslation);
+        flag.setLocalScale(initialScale);
+        flag.setShape(flagShape);
+        flag.setTextureImage(flagTexture);
+
+        // flag.setLocalLocation(new Vector3f(0, 20, 35));
+
         initialTranslation = (new Matrix4f()).translation(0, 2, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         robot = new GameObject(GameObject.root(), robotS);
@@ -313,6 +330,8 @@ public class MyGame extends VariableFrameRateGame {
             platforms.add(platform);
         }
 
+        // create ending platform - hierarchical object with finish line
+
         // Add moving platforms
         createMovingPlatforms();
 
@@ -353,9 +372,23 @@ public class MyGame extends VariableFrameRateGame {
         platform2.setLocalScale((new Matrix4f()).scaling(5.0f, 0.5f, 4.0f));
         movingPlatforms.add(platform2);
 
+        Vector3f startPos2 = new Vector3f(-8f, y2, z2);
+        Vector3f endPos2 = new Vector3f(8f, y2, z2);
+        platformStartPositions.add(startPos2);
+        platformEndPositions.add(endPos2);
+
+        // finish platform, moves up and down with flag
+        finishPlatform = new GameObject(GameObject.root(), new Cube(), new TextureImage("metal.png"));
+        finishPlatform.setLocalTranslation((new Matrix4f()).translation(0, 10.0f, 115.0f));
+        finishPlatform.setLocalScale((new Matrix4f()).scaling(5.0f, 0.5f, 4.0f));
+        movingPlatforms.add(finishPlatform);
+
+        flag.setParent(finishPlatform);
+        flag.propagateTranslation(true);
+
         // Define vertical movement path
-        Vector3f startPos2 = new Vector3f(0, y2 - 3.0f, z2);
-        Vector3f endPos2 = new Vector3f(0, y2 + 3.0f, z2);
+        startPos2 = new Vector3f(0, 5f, 115);
+        endPos2 = new Vector3f(0, 10f, 115);
         platformStartPositions.add(startPos2);
         platformEndPositions.add(endPos2);
 
@@ -631,6 +664,13 @@ public class MyGame extends VariableFrameRateGame {
         setupPendulumPhysics();
     }
 
+    public boolean detectIfAtFinishLine() {
+        if (flag.getWorldLocation().distance(dol.getWorldLocation()) < 2) {
+            return true;
+        }
+        return false;
+    }
+
     private void clearPendulumPhysics() {
         // Remove physics objects from pendulums
         for (GameObject pendulum : pendulums) {
@@ -694,7 +734,9 @@ public class MyGame extends VariableFrameRateGame {
         vase_AnimatedShape.updateAnimation();
         lastFrameTime = currFrameTime;
         currFrameTime = System.currentTimeMillis();
-
+        if (detectIfAtFinishLine()) {
+            System.exit(0);
+        }
         if (!paused)
             elapsTime += (currFrameTime - lastFrameTime) / 1000.0;
 
